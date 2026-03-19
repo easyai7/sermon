@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="설교묵상">
+  <meta name="theme-color" content="#c8a84b">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>설교 복습 | 기도는 나를 변화시킵니다</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500&display=swap');
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #E8D5A3;
+    --dark: #1A1410;
+    --dark2: #2C2418;
+    --parchment: #F7F3EC;
+    --parchment2: #EDE6D8;
+    --text: #3D2E1E;
+    --text-light: #7A6A58;
+    --accent: #8B1A1A;
+    --red-dark: #5C1010;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--parchment);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 22px;
+  }
+
+  .header {
+    background: var(--dark);
+    padding: 28px 24px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 20px,
+      rgba(201,168,76,0.04) 20px, rgba(201,168,76,0.04) 21px);
+  }
+  .header-label { font-size: 18px; font-weight: 300; letter-spacing: 4px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+  .header-title { font-family: 'Noto Serif KR', serif; font-size: 32px; font-weight: 700; color: #fff; line-height: 1.3; margin-bottom: 6px; }
+  .header-ref { font-size: 22px; color: var(--gold-light); font-weight: 300; letter-spacing: 1px; }
+  .gold-bar { height: 3px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin-top: 20px; }
+
+  .tension-box {
+    margin: 20px 16px 0;
+    background: var(--red-dark);
+    border-radius: 12px 12px 0 0;
+    padding: 22px;
+    position: relative; overflow: hidden;
+  }
+  .tension-box::before {
+    content: '?';
+    font-size: 120px; color: rgba(255,255,255,0.04);
+    position: absolute; right: 10px; top: -10px; line-height: 1;
+  }
+  .tension-label { font-size: 16px; letter-spacing: 3px; color: #ffaaaa; text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .tension-text { font-family: 'Noto Serif KR', serif; font-size: 24px; font-weight: 700; color: #fff; line-height: 1.7; }
+  .tension-sub { margin-top: 12px; font-size: 20px; color: rgba(255,200,200,0.85); line-height: 1.8; font-weight: 300; }
+
+  .grace-box {
+    margin: 0 16px 20px;
+    background: var(--dark2);
+    border-radius: 0 0 12px 12px;
+    padding: 22px;
+    border-top: 2px solid var(--gold);
+  }
+  .grace-label { font-size: 16px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .grace-text { font-family: 'Noto Serif KR', serif; font-size: 26px; font-weight: 700; color: #fff; line-height: 1.7; }
+  .grace-sub { margin-top: 12px; font-size: 20px; color: var(--gold-light); line-height: 1.8; font-weight: 300; }
+
+  .tabs { display: flex; margin: 0 16px; gap: 4px; }
+  .tab {
+    flex: 1; padding: 12px 4px; font-size: 20px; font-weight: 500;
+    text-align: center; background: var(--parchment2); color: var(--text-light);
+    border: none; border-radius: 8px 8px 0 0; cursor: pointer; transition: all 0.2s;
+  }
+  .tab.active { background: var(--dark); color: var(--gold); }
+
+  .panel {
+    margin: 0 16px 24px; background: #fff;
+    border-radius: 0 0 12px 12px; padding: 22px;
+    display: none; border: 1px solid var(--parchment2); border-top: none;
+  }
+  .panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  .misread-box {
+    background: #fff5f5; border: 1px solid #ffcccc;
+    border-radius: 10px; padding: 18px; margin-bottom: 24px;
+  }
+  .misread-label { font-size: 18px; letter-spacing: 2px; color: var(--accent); font-weight: 600; margin-bottom: 10px; }
+  .misread-text { font-size: 22px; color: var(--text); line-height: 1.9; }
+
+  .note-point {
+    margin-bottom: 24px; padding-bottom: 24px;
+    border-bottom: 1px dashed var(--parchment2);
+  }
+  .note-point:last-child { border-bottom: none; margin-bottom: 0; }
+  .note-tag { display: inline-block; background: var(--dark); color: var(--gold); font-size: 17px; letter-spacing: 1px; padding: 4px 10px; border-radius: 4px; margin-bottom: 10px; font-weight: 500; }
+  .note-tag.red { background: var(--red-dark); color: #ffaaaa; }
+  .note-text { font-size: 22px; color: var(--text); line-height: 1.9; }
+  .note-verse-ref { margin-top: 8px; font-size: 20px; color: var(--accent); font-style: italic; }
+
+  .btn-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+
+  .tts-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--dark); color: var(--gold);
+    border: none; border-radius: 20px;
+    padding: 8px 16px; font-size: 18px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .tts-btn:hover { background: #2e1f12; }
+  .tts-btn.playing { background: var(--accent); color: #fff; }
+  .tts-btn .icon { font-size: 18px; }
+
+  .verse-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--accent); color: #fff;
+    border: none; border-radius: 20px;
+    padding: 8px 16px; font-size: 18px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .verse-btn:hover { background: #a02020; }
+  .verse-btn.open { background: var(--dark2); color: var(--gold-light); }
+  .verse-btn .icon { font-size: 16px; }
+
+  .verse-box {
+    display: none;
+    margin-top: 12px;
+    background: #fefcf7;
+    border: 1px solid var(--gold-light);
+    border-left: 4px solid var(--gold);
+    border-radius: 8px;
+    padding: 16px 18px;
+    animation: slideDown 0.3s ease;
+  }
+  .verse-box.open { display: block; }
+  .verse-item { margin-bottom: 14px; }
+  .verse-item:last-child { margin-bottom: 0; }
+  .verse-item-ref {
+    font-size: 17px; font-weight: 600; color: var(--accent);
+    margin-bottom: 4px; letter-spacing: 0.5px;
+  }
+  .verse-item-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 20px; color: var(--text); line-height: 1.8;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; max-height: 0; transform: translateY(-8px); }
+    to { opacity: 1; max-height: 2000px; transform: translateY(0); }
+  }
+
+  .day-card { margin-bottom: 20px; border-left: 3px solid var(--gold); padding-left: 16px; }
+  .day-card.red { border-left-color: var(--accent); }
+  .day-label { font-size: 18px; letter-spacing: 2px; color: var(--gold); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; }
+  .day-card.red .day-label { color: var(--accent); }
+  .day-theme { font-family: 'Noto Serif KR', serif; font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .day-content { font-size: 22px; color: var(--text-light); line-height: 1.8; }
+  .day-verse { margin-top: 8px; font-size: 20px; color: var(--accent); font-style: italic; }
+
+  .question-intro { background: var(--dark); border-radius: 10px; padding: 20px; margin-bottom: 22px; text-align: center; }
+  .question-intro-top { font-size: 17px; letter-spacing: 2px; color: var(--gold); text-transform: uppercase; margin-bottom: 12px; }
+  .question-intro-text { font-family: 'Noto Serif KR', serif; font-size: 23px; font-weight: 600; color: #fff; line-height: 1.8; }
+
+  .question-card { margin-bottom: 18px; background: var(--parchment); border-radius: 10px; padding: 18px; border: 1px solid var(--parchment2); }
+  .question-card.red { border-left: 4px solid var(--accent); }
+  .question-card.gold { border-left: 4px solid var(--gold); }
+  .q-number { display: inline-block; width: 30px; height: 30px; background: var(--dark); color: var(--gold); font-size: 16px; font-weight: 700; border-radius: 50%; text-align: center; line-height: 30px; margin-bottom: 10px; }
+  .q-text { font-family: 'Noto Serif KR', serif; font-size: 23px; font-weight: 600; color: var(--text); line-height: 1.7; margin-bottom: 10px; }
+  .q-guide { font-size: 20px; color: var(--text-light); line-height: 1.7; padding-left: 14px; border-left: 2px solid var(--gold-light); }
+
+  .q-prayer { margin-top: 22px; background: var(--dark); border-radius: 10px; padding: 18px; text-align: center; }
+  .q-prayer-label { font-size: 17px; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-bottom: 10px; }
+  .q-prayer-text { font-size: 22px; color: #fff; line-height: 1.8; font-weight: 300; }
+
+  .now-playing {
+    display: none;
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--dark); color: var(--gold);
+    padding: 10px 22px; border-radius: 30px;
+    font-size: 18px; font-weight: 500;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    z-index: 100;
+    white-space: nowrap;
+  }
+  .now-playing.show { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px) translateX(-50%); } to { opacity: 1; transform: translateY(0) translateX(-50%); } }
+  #weekly .day-card, #notes .note-point { animation: none; }
+
+  .footer { text-align: center; padding: 18px; font-size: 18px; color: var(--text-light); letter-spacing: 1px; margin-bottom: 60px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">설교 복습</div>
+  <div style="font-size:18px; color:var(--gold-light); font-weight:300; letter-spacing:2px; margin-bottom:6px;">원덕제일교회 · 전준현 목사</div>
+  <div class="header-title">기도는 나를 변화시킵니다</div>
+  <div class="header-ref">누가복음 22:39–46</div>
+  <div class="gold-bar"></div>
+</div>
+
+<div class="tension-box">
+  <div class="tension-label">먼저 직면해야 할 오해</div>
+  <div class="tension-text">기도하면 상황이 바뀐다고<br>생각합니다</div>
+  <div class="tension-sub">
+    힘들 때 기도하고, 문제가 생기면 기도합니다.<br>
+    그런데 기도해도 상황이 바뀌지 않을 때,<br>
+    우리는 기도를 멈춥니다.
+  </div>
+</div>
+<div class="grace-box">
+  <div class="grace-label">그러나 — 본문이 선포하는 진리</div>
+  <div class="grace-text">기도의 가장 깊은 역사는<br>상황의 변화가 아니라<br>사람의 변화입니다</div>
+  <div class="grace-sub">
+    "내 원대로 마시옵고 아버지의 원대로 되기를 원하나이다" (누가복음 22:42)<br>
+    <strong style="color:var(--gold)">기도는 하나님이 우리를 변화시키시는 은혜의 통로.</strong>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="showTab('notes', this)">설교 핵심</button>
+  <button class="tab" onclick="showTab('weekly', this)">주간 묵상</button>
+  <button class="tab" onclick="showTab('sharing', this)">소그룹 나눔</button>
+</div>
+
+<!-- 설교 핵심 -->
+<div class="panel active" id="notes">
+
+  <div class="misread-box">
+    <div class="misread-label">⚠ 먼저 기억해야 할 것</div>
+    <div class="misread-text">
+      겟세마네는 단순히 "기도의 모범"을 보여주는 장면이 아닙니다.
+      겟세마네는 우리의 구원이 결정된 자리입니다.
+      하나님의 아들이신 예수님이 우리가 마셔야 할 하나님의 진노의 잔을 대신 마시기로 결단하신 그 자리입니다.
+      우리는 먼저 그분의 순종 앞에 감사해야 합니다.
+    </div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'context')"><span class="icon">🔊</span> 듣기</button>
+    </div>
+  </div>
+
+  <div class="note-point">
+    <div class="note-tag red">1. 기도는 마음을 쏟아 놓는 시간</div>
+    <div class="note-text">예수님은 십자가를 앞두고 "아버지여, 이 잔을 내게서 옮기시옵소서"라고 하셨습니다. 멋있는 말이 아니라, 있는 그대로의 마음을 하나님 앞에 드리신 것입니다. 기도는 완벽하게 정돈된 말을 하는 시간이 아닙니다. 힘들면 힘들다고, 아프면 아프다고 하나님께 말씀드리는 시간입니다. 하나님은 이미 우리의 마음을 아시는 아버지이십니다.</div>
+    <div class="note-verse-ref">누가복음 22:42a / 베드로전서 5:7</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'pour')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'pour')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-pour"></div>
+  </div>
+
+  <div class="note-point">
+    <div class="note-tag red">2. 기도는 내 뜻이 하나님 뜻으로 바뀌는 시간</div>
+    <div class="note-text">예수님의 기도는 "이 잔을 옮겨 주십시오"에서 "아버지의 원대로 되기를 원하나이다"로 바뀝니다. 이것이 겟세마네 기도의 핵심입니다. 기도는 하나님을 우리 편으로 바꾸는 것이 아닙니다. 기도는 우리가 하나님 편으로 바뀌는 것입니다. 칼빈은 이렇게 가르쳤습니다. "기도는 하나님을 우리의 뜻에 맞추는 것이 아니라 우리의 마음을 하나님의 뜻에 복종시키는 것이다." 기도하면 생각이 바뀌고, 마음이 바뀌고, 삶의 방향이 바뀝니다.</div>
+    <div class="note-verse-ref">누가복음 22:42b / 로마서 12:2</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'change')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'change')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-change"></div>
+  </div>
+
+  <div class="note-point">
+    <div class="note-tag">3. 기도는 하나님이 새 힘을 주시는 시간</div>
+    <div class="note-text">기도 후에 십자가는 사라지지 않았습니다. 문제는 그대로였습니다. 그러나 달라진 것이 있었습니다. 예수님의 내면이 달라졌습니다. 천사가 나타나 힘을 더했고, 예수님은 그 힘으로 십자가를 향해 걸어가셨습니다. 기도하면 문제가 먼저 사라지는 것이 아닙니다. 기도하면 하나님이 우리에게 새 힘을 주십니다. 그 힘으로 우리는 끝까지 감당합니다.</div>
+    <div class="note-verse-ref">누가복음 22:43–44 / 이사야 40:31 / 빌립보서 4:13</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'strength')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'strength')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-strength"></div>
+  </div>
+
+  <div class="note-point">
+    <div class="note-tag">4. 기도는 시험을 이기는 힘</div>
+    <div class="note-text">겟세마네에는 두 부류가 있었습니다. 기도하신 예수님과 잠든 제자들. 예수님은 십자가의 길을 끝까지 감당하셨지만, 제자들은 기도하지 않았고 그 자리에서 모두 도망갔습니다. 기도하지 않으면 믿음이 약해지고, 시험에 넘어집니다. 기도는 성도의 호흡입니다. 기도를 멈추면 영적 생명이 약해집니다.</div>
+    <div class="note-verse-ref">누가복음 22:46 / 데살로니가전서 5:17 / 골로새서 4:2</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'test')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'test')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-test"></div>
+  </div>
+
+  <div class="note-point">
+    <div class="note-tag">설교자의 결론적 적용</div>
+    <div class="note-text">기도의 가장 큰 능력은 환경의 변화가 아니라 사람의 변화입니다. 기도하면 두려움이 평안으로, 원망이 감사로, 내 뜻이 하나님의 뜻으로 변합니다. 겟세마네에서 예수님이 드리신 그 기도가 오늘 우리의 기도가 되어야 합니다. 이번 한 주, 아침마다 단 5분이라도 이 기도를 드려 보십시오. "하나님, 내 뜻이 아니라 주의 뜻이 이루어지게 하옵소서."</div>
+    <div class="note-verse-ref">누가복음 22:42 / 로마서 12:2</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'conclusion')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'conclusion')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-conclusion"></div>
+  </div>
+
+</div>
+
+<!-- 주간 묵상 -->
+<div class="panel" id="weekly">
+
+  <div class="day-card red">
+    <div class="day-label">월요일</div>
+    <div class="day-theme">겟세마네는 구원이 시작된 자리</div>
+    <div class="day-content">우리가 기도를 배우기 전에, 먼저 기억해야 할 것이 있습니다. 예수님은 겟세마네에서 우리가 마셔야 할 진노의 잔을 대신 마시기로 결단하셨습니다. 그 순종이 우리의 구원입니다. 오늘 하루, 그 은혜 앞에 먼저 감사하십시오.</div>
+    <div class="day-verse">고린도후서 5:21 — "우리로 하여금 그 안에서 하나님의 의가 되게 하려 하심이라"</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'mon')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'mon')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-mon"></div>
+  </div>
+
+  <div class="day-card red">
+    <div class="day-label">화요일</div>
+    <div class="day-theme">마음을 있는 그대로 드리십시오</div>
+    <div class="day-content">예수님은 "이 잔을 옮겨 주십시오"라고 솔직하게 기도하셨습니다. 기도는 멋진 말을 하는 시간이 아닙니다. 지금 내 마음이 어떻습니까? 힘들다면 힘들다고, 두렵다면 두렵다고 하나님 앞에 있는 그대로 드려보십시오.</div>
+    <div class="day-verse">베드로전서 5:7 — "너희 염려를 다 주께 맡기라 이는 그가 너희를 돌보심이라"</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'tue')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'tue')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-tue"></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-label">수요일</div>
+    <div class="day-theme">내 뜻이 아니라 아버지의 뜻</div>
+    <div class="day-content">기도는 하나님을 내 편으로 바꾸는 것이 아닙니다. 기도하는 가운데 내가 하나님 편으로 바뀝니다. 오늘 기도 중에 내가 고집하고 있는 내 뜻이 있다면, 그것을 하나님 앞에 내려놓아 보십시오.</div>
+    <div class="day-verse">로마서 12:2 — "오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라"</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'wed')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'wed')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-wed"></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-label">목요일</div>
+    <div class="day-theme">기도 후 주어지는 새 힘</div>
+    <div class="day-content">예수님이 기도하셨을 때 십자가가 없어진 것이 아닙니다. 그러나 감당할 힘이 주어졌습니다. 지금 내 앞에 무거운 짐이 있습니까? 기도하면 상황이 아니라 내가 달라집니다. 그 힘으로 오늘 하루를 감당하십시오.</div>
+    <div class="day-verse">이사야 40:31 — "오직 여호와를 앙망하는 자는 새 힘을 얻으리니"</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'thu')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'thu')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-thu"></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-label">금요일</div>
+    <div class="day-theme">기도하지 않으면 넘어집니다</div>
+    <div class="day-content">겟세마네에서 잠든 제자들은 기도하지 않았고, 시험이 왔을 때 모두 도망갔습니다. 기도는 선택이 아니라 성도의 호흡입니다. 오늘 혹시 기도를 미루고 있습니까? 지금 다시 기도의 자리로 나아오십시오.</div>
+    <div class="day-verse">데살로니가전서 5:17 — "쉬지 말고 기도하라"</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'fri')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'fri')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-fri"></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-label">토요일</div>
+    <div class="day-theme">기도하는 사람은 변합니다</div>
+    <div class="day-content">기도하는 사람은 두려움이 평안으로, 원망이 감사로, 내 뜻이 하나님의 뜻으로 변합니다. 이번 한 주 기도하면서 내 안에 어떤 변화가 있었는지 돌아보십시오. 작은 변화라도 그것이 하나님의 역사입니다.</div>
+    <div class="day-verse">빌립보서 4:13 — "내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라"</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'sat')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'sat')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-sat"></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-label">주일 준비</div>
+    <div class="day-theme">이 한 주를 돌아보며</div>
+    <div class="day-content">이번 한 주 동안 기도하면서 내 마음이 바뀐 순간이 있었습니까? "내 원대로 마옵시고 아버지의 뜻대로"라고 고백한 적이 있었습니까? 그 고백을 마음에 담아 오늘 예배를 준비하십시오.</div>
+    <div class="day-verse">누가복음 22:42 — "내 원대로 마시옵고 아버지의 원대로 되기를 원하나이다"</div>
+    <div class="btn-row">
+      <button class="tts-btn" onclick="speak(this, 'sun')"><span class="icon">🔊</span> 듣기</button>
+      <button class="verse-btn" onclick="toggleVerse(this, 'sun')"><span class="icon">📖</span> 성구확인</button>
+    </div>
+    <div class="verse-box" id="vb-sun"></div>
+  </div>
+
+</div>
+
+<!-- 소그룹 나눔 -->
+<div class="panel" id="sharing">
+
+  <div class="question-intro">
+    <div class="question-intro-top">나눔의 중심 질문</div>
+    <div class="question-intro-text">
+      기도의 가장 깊은 역사는 상황의 변화가 아니라<br>
+      나 자신의 변화입니다.<br>
+      우리는 기도를 통해 어떻게 변화되고 있습니까?
+    </div>
+  </div>
+
+  <div class="question-card red">
+    <div class="q-number">1</div>
+    <div class="q-text">기도해도 상황이 변하지 않아 실망하거나 기도를 멈춘 경험이 있습니까? 오늘 설교를 통해 기도에 대한 생각이 어떻게 바뀌었습니까?</div>
+    <div class="q-guide">나눔 방향 → "기도 = 상황 변화"라는 오해에서 "기도 = 나의 변화"로 이동하도록 이끌어 주십시오. 실망 경험을 정죄하지 말고 공감하며 시작하십시오.</div>
+  </div>
+
+  <div class="question-card red">
+    <div class="q-number">2</div>
+    <div class="q-text">예수님은 겟세마네에서 "이 잔을 옮겨 주세요"라고 솔직하게 기도하셨습니다. 나는 하나님 앞에 내 마음을 있는 그대로 드리고 있습니까? 아니면 멋진 말로 포장하고 있습니까?</div>
+    <div class="q-guide">나눔 방향 → 기도에서의 솔직함, 하나님 앞에서의 있는 모습 그대로. 형식적 기도 vs 진심의 기도를 나눠 보십시오.</div>
+  </div>
+
+  <div class="question-card gold">
+    <div class="q-number">3</div>
+    <div class="q-text">"내 원대로 마옵시고 아버지의 원대로 하옵소서"라는 고백이 내 기도에서 실제로 일어난 적이 있습니까? 그 경험을 나눠봅시다.</div>
+    <div class="q-guide">나눔 방향 → 기도 중 내 뜻을 내려놓은 경험, 그 이후 찾아온 평안이나 변화를 나누십시오. 어렵다면 그것도 솔직하게 나눌 수 있습니다.</div>
+  </div>
+
+  <div class="question-card gold">
+    <div class="q-number">4</div>
+    <div class="q-text">이번 한 주, 아침마다 5분씩 "하나님, 내 뜻이 아니라 주의 뜻이 이루어지게 하옵소서"라고 기도해 보겠습니까? 서로 이번 주 기도 제목을 나눠봅시다.</div>
+    <div class="q-guide">나눔 방향 → 결단과 실천으로 마무리. 거창한 기도가 아니라 하루 5분의 작은 기도부터 시작하도록 격려하십시오.</div>
+  </div>
+
+  <div class="q-prayer">
+    <div class="q-prayer-label">함께 기도하며 마칩니다</div>
+    <div class="q-prayer-text">
+      상황이 아닌 내 마음을 바꾸어 주시는 하나님,<br>
+      이번 한 주 기도의 자리에서<br>
+      "아버지의 뜻대로"라고 고백하며<br>
+      변화되는 우리가 되게 하옵소서.
+    </div>
+  </div>
+
+</div>
+
+<div id="nowPlaying" class="now-playing">🔊 재생 중...</div>
+
+<div class="footer">누가복음 22:39–46 · 기도는 나를 변화시킵니다</div>
+
+<script>
+// ===== 성구 데이터 =====
+const verseData = {
+  pour: [
+    { ref: '누가복음 22:42', text: '이르시되 아버지여 만일 아버지의 뜻이거든 이 잔을 내게서 옮기시옵소서 그러나 내 원대로 마시옵고 아버지의 원대로 되기를 원하나이다 하시니' },
+    { ref: '베드로전서 5:7', text: '너희 염려를 다 주께 맡기라 이는 그가 너희를 돌보심이라' }
+  ],
+  change: [
+    { ref: '누가복음 22:42', text: '이르시되 아버지여 만일 아버지의 뜻이거든 이 잔을 내게서 옮기시옵소서 그러나 내 원대로 마시옵고 아버지의 원대로 되기를 원하나이다 하시니' },
+    { ref: '로마서 12:2', text: '너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라' }
+  ],
+  strength: [
+    { ref: '누가복음 22:43-44', text: '천사가 하늘로부터 예수께 나타나 힘을 더하더라 예수께서 힘쓰고 애써 더욱 간절히 기도하시니 땀이 땅에 떨어지는 핏방울 같이 되더라' },
+    { ref: '이사야 40:31', text: '오직 여호와를 앙망하는 자는 새 힘을 얻으리니 독수리가 날개치며 올라감 같을 것이요 달려가도 곤비하지 아니하겠고 걸어가도 피곤하지 아니하리로다' },
+    { ref: '빌립보서 4:13', text: '내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라' }
+  ],
+  test: [
+    { ref: '누가복음 22:46', text: '이르시되 어찌하여 자느냐 시험에 들지 않게 일어나 기도하라 하시니라' },
+    { ref: '데살로니가전서 5:17', text: '쉬지 말고 기도하라' },
+    { ref: '골로새서 4:2', text: '기도를 항상 힘쓰고 기도에 감사함으로 깨어 있으라' }
+  ],
+  conclusion: [
+    { ref: '누가복음 22:42', text: '이르시되 아버지여 만일 아버지의 뜻이거든 이 잔을 내게서 옮기시옵소서 그러나 내 원대로 마시옵고 아버지의 원대로 되기를 원하나이다 하시니' },
+    { ref: '로마서 12:2', text: '너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라' }
+  ],
+  mon: [
+    { ref: '고린도후서 5:21', text: '하나님이 죄를 알지도 못하신 이를 우리를 대신하여 죄로 삼으신 것은 우리로 하여금 그 안에서 하나님의 의가 되게 하려 하심이라' }
+  ],
+  tue: [
+    { ref: '베드로전서 5:7', text: '너희 염려를 다 주께 맡기라 이는 그가 너희를 돌보심이라' }
+  ],
+  wed: [
+    { ref: '로마서 12:2', text: '너희는 이 세대를 본받지 말고 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라' }
+  ],
+  thu: [
+    { ref: '이사야 40:31', text: '오직 여호와를 앙망하는 자는 새 힘을 얻으리니 독수리가 날개치며 올라감 같을 것이요 달려가도 곤비하지 아니하겠고 걸어가도 피곤하지 아니하리로다' }
+  ],
+  fri: [
+    { ref: '데살로니가전서 5:17', text: '쉬지 말고 기도하라' },
+    { ref: '골로새서 4:2', text: '기도를 항상 힘쓰고 기도에 감사함으로 깨어 있으라' }
+  ],
+  sat: [
+    { ref: '빌립보서 4:13', text: '내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라' }
+  ],
+  sun: [
+    { ref: '누가복음 22:42', text: '이르시되 아버지여 만일 아버지의 뜻이거든 이 잔을 내게서 옮기시옵소서 그러나 내 원대로 마시옵고 아버지의 원대로 되기를 원하나이다 하시니' }
+  ]
+};
+
+// ===== 성구확인 토글 =====
+function toggleVerse(btn, key) {
+  const box = document.getElementById('vb-' + key);
+  const isOpen = box.classList.contains('open');
+
+  document.querySelectorAll('.verse-box.open').forEach(b => {
+    b.classList.remove('open');
+    b.innerHTML = '';
+  });
+  document.querySelectorAll('.verse-btn.open').forEach(b => {
+    b.classList.remove('open');
+    b.innerHTML = '<span class="icon">📖</span> 성구확인';
+  });
+
+  if (!isOpen) {
+    const verses = verseData[key];
+    if (!verses) return;
+    let html = '';
+    verses.forEach(v => {
+      html += '<div class="verse-item">';
+      html += '<div class="verse-item-ref">' + v.ref + '</div>';
+      html += '<div class="verse-item-text">' + v.text + '</div>';
+      html += '</div>';
+    });
+    box.innerHTML = html;
+    box.classList.add('open');
+    btn.classList.add('open');
+    btn.innerHTML = '<span class="icon">📖</span> 닫기';
+  }
+}
+
+// ===== 탭 전환 =====
+function showTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  stopAudio();
+  document.querySelectorAll('.verse-box.open').forEach(b => { b.classList.remove('open'); b.innerHTML = ''; });
+  document.querySelectorAll('.verse-btn.open').forEach(b => { b.classList.remove('open'); b.innerHTML = '<span class="icon">📖</span> 성구확인'; });
+}
+
+// ===== TTS 텍스트 =====
+const ttsTexts = {
+  context: `겟세마네는 단순히 기도의 모범을 보여주는 장면이 아닙니다. 겟세마네는 우리의 구원이 결정된 자리입니다. 예수님 앞에 놓인 잔은 우리가 마셔야 할 하나님의 진노의 잔이었습니다. 그 잔을 예수님이 대신 마시기로 결단하신 자리가 바로 겟세마네입니다. 사도 바울은 이렇게 선포합니다. 하나님이 죄를 알지도 못하신 이를 우리를 대신하여 죄로 삼으신 것은 우리로 하여금 그 안에서 하나님의 의가 되게 하려 하심이라. 우리가 기도를 배우기 이전에, 우리는 먼저 이 사실 앞에 감사해야 합니다.`,
+  pour: `예수님은 십자가를 앞두고 하나님께 솔직하게 여쭈셨습니다. 아버지, 할 수만 있다면 이 잔을 옮겨 주십시오. 멋있는 말이 아닙니다. 고통스러운 마음을 있는 그대로 하나님 앞에 드리신 것입니다. 기도는 완벽하게 정돈된 말을 하는 시간이 아닙니다. 기도는 마음을 하나님께 있는 그대로 드리는 시간입니다. 하나님은 우리의 마음을 이미 알고 계십니다. 힘들면 힘들다고 말하십시오. 아프면 아프다고 말하십시오. 답답하면 답답하다고 말하십시오. 하나님은 그 기도를 외면하지 않으시는 아버지이십니다.`,
+  change: `예수님의 기도가 시작은 이 잔을 옮겨 주십시오 였지만, 기도하는 가운데 아버지의 원대로 되기를 원하나이다로 바뀝니다. 이것이 겟세마네 기도의 핵심입니다. 기도는 하나님을 우리 편으로 바꾸는 것이 아닙니다. 기도는 우리가 하나님 편으로 바뀌는 것입니다. 종교개혁자 칼빈은 이렇게 가르쳤습니다. 기도는 하나님을 우리의 뜻에 맞추는 것이 아니라 우리의 마음을 하나님의 뜻에 복종시키는 것이다. 처음에는 하나님, 이 문제를 없애 주세요. 그러나 기도하다 보면 이렇게 됩니다. 하나님, 이 문제 속에서도 주의 뜻이 이루어지기를 원합니다. 기도하면 생각이 바뀝니다. 기도하면 마음이 바뀝니다. 기도하면 삶의 방향이 바뀝니다.`,
+  strength: `기도가 끝났을 때 십자가는 사라지지 않았습니다. 문제는 그대로 있었습니다. 그러나 달라진 것이 있었습니다. 예수님의 내면이 달라졌습니다. 기도하기 전에는 고통이 있었지만, 기도한 후에는 감당할 힘이 주어졌습니다. 기도하면 문제가 먼저 사라지는 것이 아닙니다. 기도하면 하나님이 우리에게 새 힘을 주십니다. 이사야 40장은 약속합니다. 오직 여호와를 앙망하는 자는 새 힘을 얻으리니 독수리가 날개치며 올라감 같을 것이요. 그 힘으로 예수님은 십자가를 향해 걸어가셨습니다. 기도하는 사람은 넘어지지 않습니다. 기도하는 사람은 다시 일어섭니다. 기도하는 사람은 결국 끝까지 감당합니다.`,
+  test: `겟세마네 동산에는 두 부류의 사람이 있었습니다. 기도하신 예수님, 그리고 잠든 제자들. 결과는 어떻게 되었습니까? 예수님은 가장 혹독한 십자가의 길을 끝까지 감당하셨습니다. 그러나 제자들은 기도하지 않았고, 그 자리에서 모두 도망갔습니다. 예수님이 제자들에게 말씀하셨습니다. 어찌하여 자느냐, 시험에 들지 않게 일어나 기도하라. 기도하지 않으면 믿음이 약해집니다. 기도하지 않으면 시험에 넘어집니다. 기도는 선택이 아닙니다. 기도는 성도의 호흡입니다. 기도를 멈추면 영적 생명이 약해집니다.`,
+  conclusion: `기도의 가장 큰 능력은 환경의 변화가 아니라 사람의 변화입니다. 기도하면 두려움이 평안으로 변합니다. 기도하면 원망이 감사로 변합니다. 기도하면 내 뜻이 하나님의 뜻으로 변합니다. 겟세마네에서 예수님이 드리신 그 기도가 오늘 우리의 기도가 되기를 바랍니다. 내 원대로 마옵시고, 아버지의 뜻대로 하옵소서. 이번 한 주, 아침마다 단 5분이라도 이 기도를 드려보시기 바랍니다. 하나님, 내 뜻이 아니라 주의 뜻이 이루어지게 하옵소서. 그때 하나님께서 우리의 삶을 변화시키시고, 우리의 인생을 은혜로 이끌어 주실 것입니다.`,
+  mon: `월요일 묵상입니다. 주제는 겟세마네는 구원이 시작된 자리입니다. 우리는 기도를 배우기 전에 먼저 기억해야 할 것이 있습니다. 예수님이 겟세마네에서 기도하신 것은 단순히 두려움을 극복하기 위한 것이 아닙니다. 예수님 앞에 놓인 잔은 우리가 마셔야 할 하나님의 진노의 잔이었습니다. 예수님은 그 잔을 우리 대신 마시기로 결단하셨습니다. 그것이 우리의 구원입니다. 고린도후서 5장 21절은 말씀합니다. 하나님이 죄를 알지도 못하신 이를 우리를 대신하여 죄로 삼으신 것은 우리로 하여금 그 안에서 하나님의 의가 되게 하려 하심이라. 오늘 하루, 기도하기 전에 먼저 이 은혜 앞에 감사하며 시작하십시오.`,
+  tue: `화요일 묵상입니다. 주제는 마음을 있는 그대로 드리십시오입니다. 예수님은 아버지여, 이 잔을 내게서 옮기시옵소서라고 솔직하게 기도하셨습니다. 멋있는 말이 아닙니다. 고통스러운 마음을 있는 그대로 드리신 것입니다. 기도는 완벽하게 정돈된 말을 해야 하는 시간이 아닙니다. 지금 내 마음이 어떻습니까? 힘들다면 힘들다고, 두렵다면 두렵다고, 억울하다면 억울하다고 하나님 앞에 있는 그대로 드려보십시오. 베드로전서 5장 7절은 말씀합니다. 너희 염려를 다 주께 맡기라, 이는 그가 너희를 돌보심이라. 하나님은 그 솔직한 기도를 외면하지 않으시는 아버지이십니다.`,
+  wed: `수요일 묵상입니다. 주제는 내 뜻이 아니라 아버지의 뜻입니다. 예수님의 기도가 이 잔을 옮겨 주십시오에서 아버지의 원대로 되기를 원하나이다로 바뀌었습니다. 기도는 하나님을 내 편으로 바꾸는 것이 아닙니다. 기도하는 가운데 내가 하나님 편으로 바뀌는 것입니다. 오늘 기도 중에 내가 내려놓지 못하고 붙들고 있는 나의 뜻이 있다면, 그것을 하나님 앞에 내려놓아 보십시오. 로마서 12장 2절은 말씀합니다. 오직 마음을 새롭게 함으로 변화를 받아 하나님의 선하시고 기뻐하시고 온전하신 뜻이 무엇인지 분별하도록 하라.`,
+  thu: `목요일 묵상입니다. 주제는 기도 후 주어지는 새 힘입니다. 예수님이 기도하셨을 때 십자가가 없어진 것이 아닙니다. 고난의 길은 그대로였습니다. 그러나 달라진 것이 있었습니다. 천사가 하늘로부터 나타나 힘을 더했고, 예수님은 그 힘으로 십자가를 향해 걸어가셨습니다. 지금 내 앞에 무거운 짐이 있습니까? 기도는 그 짐을 없애 주는 것이 아닙니다. 기도는 그 짐을 감당할 힘을 주시는 것입니다. 이사야 40장 31절은 약속합니다. 오직 여호와를 앙망하는 자는 새 힘을 얻으리니.`,
+  fri: `금요일 묵상입니다. 주제는 기도하지 않으면 넘어집니다입니다. 겟세마네에서 잠든 제자들을 기억하십시오. 그들은 기도하지 않았고, 시험이 왔을 때 모두 도망갔습니다. 예수님은 경고하셨습니다. 시험에 들지 않게 일어나 기도하라. 기도는 선택이 아닙니다. 기도는 성도의 호흡입니다. 오늘 혹시 기도를 미루고 있습니까? 지금 이 순간부터 다시 기도의 자리로 나아오십시오. 데살로니가전서 5장 17절의 말씀 그대로입니다. 쉬지 말고 기도하라.`,
+  sat: `토요일 묵상입니다. 주제는 기도하는 사람은 변합니다입니다. 이번 한 주를 돌아보십시오. 기도하면서 내 안에 어떤 변화가 있었습니까? 기도하면 두려움이 평안으로 변합니다. 기도하면 원망이 감사로 변합니다. 기도하면 내 뜻이 하나님의 뜻으로 변합니다. 작은 변화라도 그것이 하나님의 역사입니다. 빌립보서 4장 13절은 고백합니다. 내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라. 기도하는 사람은 변합니다. 기도하는 교회는 살아납니다. 기도하는 성도는 반드시 승리합니다.`,
+  sun: `주일 준비 묵상입니다. 이번 한 주를 돌아보십시오. 기도하면서 내 마음이 바뀐 순간이 있었습니까? 힘들다고 솔직하게 말씀드린 적이 있었습니까? 내 뜻이 아니라 아버지의 뜻대로 하옵소서라고 고백한 순간이 있었습니까? 새 힘을 받아 다시 일어선 경험이 있었습니까? 기도를 통해 나 자신이 변화되고 있다면, 그것이 바로 겟세마네의 기도가 오늘 우리 안에서 살아 역사하는 증거입니다. 그 고백을 마음에 담아 오늘 예배를 준비하십시오. 내 원대로 마옵시고, 아버지의 뜻대로 하옵소서.`
+};
+
+// ===== MP3 재생 / TTS 폴백 =====
+let _audio = null;
+
+function stopAudio() {
+  if (_audio) { _audio.pause(); _audio.currentTime = 0; _audio = null; }
+  window.speechSynthesis && window.speechSynthesis.cancel();
+}
+
+function speak(btn, key) {
+  if (btn.classList.contains('playing')) {
+    stopAudio();
+    btn.classList.remove('playing');
+    btn.innerHTML = '<span class="icon">🔊</span> 듣기';
+    return;
+  }
+  document.querySelectorAll('.tts-btn.playing').forEach(b => {
+    b.classList.remove('playing');
+    b.innerHTML = '<span class="icon">🔊</span> 듣기';
+  });
+  stopAudio();
+
+  function speakTTS(b, k) {
+    const text = ttsTexts[k];
+    if (!text || !window.speechSynthesis) return;
+    const sentences = text.match(/[^.!?。]+[.!?。]*/g) || [text];
+    let i = 0;
+    b.classList.add('playing');
+    b.innerHTML = '<span class="icon">⏹</span> 멈춤';
+    function next() {
+      if (i >= sentences.length || !b.classList.contains('playing')) {
+        b.classList.remove('playing');
+        b.innerHTML = '<span class="icon">🔊</span> 듣기';
+        return;
+      }
+      const u = new SpeechSynthesisUtterance(sentences[i++].trim());
+      u.lang = 'ko-KR'; u.rate = 0.95;
+      u.onend = next;
+      window.speechSynthesis.speak(u);
+    }
+    next();
+  }
+
+  const isLocal = location.protocol === 'file:';
+
+  if (!isLocal) {
+    let fell = false;
+    function fallback() { if (fell) return; fell = true; _audio = null; speakTTS(btn, key); }
+    _audio = new Audio('audio/' + key + '.mp3');
+    btn.classList.add('playing');
+    btn.innerHTML = '<span class="icon">⏹</span> 멈춤';
+    _audio.onended = () => { btn.classList.remove('playing'); btn.innerHTML = '<span class="icon">🔊</span> 듣기'; _audio = null; };
+    _audio.onerror = fallback;
+    _audio.play().catch(fallback);
+  } else {
+    speakTTS(btn, key);
+  }
+}
+
+window.speechSynthesis && (window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); });
+
+</script>
+</body>
+</html>
