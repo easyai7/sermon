@@ -2,6 +2,25 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<script>
+  (function() {
+    var ua = navigator.userAgent || '';
+    var isKakao = /KAKAOTALK/i.test(ua);
+    var isInApp = /FBAN|FBAV|Instagram|Line|NAVER|DaumApps/i.test(ua);
+    if (isKakao || isInApp) {
+      var url = location.href;
+      // 안드로이드: intent로 크롬 강제 실행
+      if (/Android/i.test(ua)) {
+        location.href = 'intent://' + url.replace(/^https?:\/\//, '') +
+          '#Intent;scheme=https;package=com.android.chrome;end';
+      }
+      // iOS: 크롬 앱으로 리다이렉트
+      else if (/iPhone|iPad|iPod/i.test(ua)) {
+        location.href = 'googlechrome://' + url.replace(/^https?:\/\//, '');
+      }
+    }
+  })();
+</script>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <meta name="mobile-web-app-capable" content="yes">
