@@ -589,65 +589,66 @@ const ttsTexts = {
   sun: `주일 준비 묵상입니다. 이번 한 주를 돌아보십시오. 기도하면서 내 마음이 바뀐 순간이 있었습니까? 힘들다고 솔직하게 말씀드린 적이 있었습니까? 내 뜻이 아니라 아버지의 뜻대로 하옵소서라고 고백한 순간이 있었습니까? 새 힘을 받아 다시 일어선 경험이 있었습니까? 기도를 통해 나 자신이 변화되고 있다면, 그것이 바로 겟세마네의 기도가 오늘 우리 안에서 살아 역사하는 증거입니다. 그 고백을 마음에 담아 오늘 예배를 준비하십시오. 내 원대로 마옵시고, 아버지의 뜻대로 하옵소서.`
 };
 
-// ===== MP3 재생 / TTS 폴백 =====
+// ===== Google Cloud TTS API =====
+const GOOGLE_TTS_KEY = 'AIzaSyArmyD-BmAelbYvhQK_N3JlarDPduWZwU0';
 let _audio = null;
 
 function stopAudio() {
   if (_audio) { _audio.pause(); _audio.currentTime = 0; _audio = null; }
-  window.speechSynthesis && window.speechSynthesis.cancel();
 }
 
-function speak(btn, key) {
+function resetBtn(btn) {
+  btn.classList.remove('playing');
+  btn.innerHTML = '<span class="icon">🔊</span> 듣기';
+}
+
+async function speak(btn, key) {
   if (btn.classList.contains('playing')) {
     stopAudio();
-    btn.classList.remove('playing');
-    btn.innerHTML = '<span class="icon">🔊</span> 듣기';
+    resetBtn(btn);
     return;
   }
-  document.querySelectorAll('.tts-btn.playing').forEach(b => {
-    b.classList.remove('playing');
-    b.innerHTML = '<span class="icon">🔊</span> 듣기';
-  });
+  document.querySelectorAll('.tts-btn.playing').forEach(b => resetBtn(b));
   stopAudio();
 
-  function speakTTS(b, k) {
-    const text = ttsTexts[k];
-    if (!text || !window.speechSynthesis) return;
-    const sentences = text.match(/[^.!?。]+[.!?。]*/g) || [text];
-    let i = 0;
-    b.classList.add('playing');
-    b.innerHTML = '<span class="icon">⏹</span> 멈춤';
-    function next() {
-      if (i >= sentences.length || !b.classList.contains('playing')) {
-        b.classList.remove('playing');
-        b.innerHTML = '<span class="icon">🔊</span> 듣기';
-        return;
+  const text = ttsTexts[key];
+  if (!text) return;
+
+  btn.classList.add('playing');
+  btn.innerHTML = '<span class="icon">⏹</span> 멈춤';
+
+  try {
+    const res = await fetch(
+      `https://texttospeech.googleapis.com/v1/text:synthesize?key=${GOOGLE_TTS_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          input: { text },
+          voice: { languageCode: 'ko-KR', name: 'ko-KR-Wavenet-B' },
+          audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95 }
+        })
       }
-      const u = new SpeechSynthesisUtterance(sentences[i++].trim());
-      u.lang = 'ko-KR'; u.rate = 0.95;
-      u.onend = next;
-      window.speechSynthesis.speak(u);
-    }
-    next();
-  }
+    );
+    const data = await res.json();
+    if (!data.audioContent) throw new Error('No audio');
 
-  const isLocal = location.protocol === 'file:';
+    const binary = atob(data.audioContent);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const blob = new Blob([bytes], { type: 'audio/mp3' });
+    const url = URL.createObjectURL(blob);
 
-  if (!isLocal) {
-    let fell = false;
-    function fallback() { if (fell) return; fell = true; _audio = null; speakTTS(btn, key); }
-    _audio = new Audio('audio/' + key + '.mp3');
-    btn.classList.add('playing');
-    btn.innerHTML = '<span class="icon">⏹</span> 멈춤';
-    _audio.onended = () => { btn.classList.remove('playing'); btn.innerHTML = '<span class="icon">🔊</span> 듣기'; _audio = null; };
-    _audio.onerror = fallback;
-    _audio.play().catch(fallback);
-  } else {
-    speakTTS(btn, key);
+    _audio = new Audio(url);
+    _audio.onended = () => { resetBtn(btn); URL.revokeObjectURL(url); _audio = null; };
+    _audio.onerror = () => { resetBtn(btn); _audio = null; };
+    _audio.play();
+  } catch (e) {
+    console.error('Google TTS 오류:', e);
+    resetBtn(btn);
+    alert('음성 재생 오류가 발생했습니다.');
   }
 }
-
-window.speechSynthesis && (window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); });
 
 </script>
 </body>
